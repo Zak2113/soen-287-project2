@@ -1,0 +1,115 @@
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    background-color: var(--white);
+    width: 100%;
+    max-width: 450px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h2 {
+    margin-top: 1rem;
+    color: var(--primary-blue);
+    font-size: 1.5rem;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+}
+
+.btn-block {
+    width: 100%;
+    display: block;
+}
+
+.auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-footer p {
+    margin-bottom: 0.5rem;
+}
+
+.text-link {
+    color: var(--accent-orange);
+    font-weight: 500;
+}
+
+.text-link:hover {
+    text-decoration: underline;
+}
+
+.grader-shortcuts-small {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: var(--dev-bg);
+    border: 2px var(--dev-border);
+    text-align: center;
+}
+
+.grader-shortcuts-small p {
+    color: var(--dev-text);
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.grader-shortcuts-small .btn-dev {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.grader-shortcuts-small .btn-dev:last-child {
+    margin-bottom: 0;
+}
