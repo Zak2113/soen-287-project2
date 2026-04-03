@@ -1,0 +1,79 @@
+.assessment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.assessment-item {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.assessment-date {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    min-width: 55px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem;
+}
+
+.assessment-date .month {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent-orange);
+}
+
+.assessment-date .day {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    line-height: 1.1;
+}
+
+.assessment-details {
+    flex-grow: 1;
+}
+
+.assessment-title {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    margin-bottom: 0.1rem;
+}
+
+.assessment-course {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+
+.status-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-due-soon {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-graded {
+    background-color: #dcfce7;
+    color: #166534;
+}
