@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Drizzle migrations (Optional, but keep them if you want to track schema history)
+/db/migrations

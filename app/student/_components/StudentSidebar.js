@@ -1,23 +1,30 @@
-"use client"; // Required to read the current URL path
+"use client"; 
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTransition } from 'react'; // Added for loading state
+import { logoutUser } from '@/app/actions/auth'; // Import your logout action
 
 export default function StudentSidebar() {
-  // This hook grabs the current URL (e.g., "/student/courses")
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  const handleLogout = () => {
+    // startTransition wraps the server action to handle the "loading" state
+    startTransition(async () => {
+      await logoutUser();
+    });
+  };
 
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        {/* Link back to the public landing page */}
         <Link href="/" className="brand-logo">
           Noodle<span className="brand-accent">.</span>
         </Link>
       </div>
 
       <nav className="sidebar-nav">
-        {/* We use template literals (``) to conditionally add the "active" class */}
         <Link 
           href="/student" 
           className={`nav-item ${pathname === '/student' ? 'active' : ''}`}
@@ -55,10 +62,21 @@ export default function StudentSidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        {/* Log Out link (you can update this path later when you build auth) */}
-        <Link href="/login" className="nav-item">
-          Log Out
-        </Link>
+        {/* Swapped Link for a Button to trigger the Server Action */}
+        <button 
+          onClick={handleLogout}
+          disabled={isPending}
+          className="nav-item logout-btn"
+          style={{ 
+            width: '100%', 
+            textAlign: 'left', 
+            background: 'none', 
+            border: 'none', 
+            cursor: isPending ? 'not-allowed' : 'pointer' 
+          }}
+        >
+          {isPending ? "Logging Out..." : "Log Out"}
+        </button>
       </div>
     </aside>
   );
