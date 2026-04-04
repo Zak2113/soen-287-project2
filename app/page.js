@@ -21,7 +21,7 @@ export default function LandingPage() {
       <main>
         <section className="hero">
           <div className="container">
-            <h1>The smart way to manage learning.</h1>
+            <h1>The smart way to manage learning</h1>
             <p>A powerful, intuitive platform designed to connect students and instructors seamlessly.</p>
             <div className="hero-actions">
               <Link href="/register" className="btn btn-primary">Start Learning</Link>
