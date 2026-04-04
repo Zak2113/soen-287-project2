@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import styles from './CourseCard.module.css'
 
-export default function CourseCard({ courseCode, term, title, instructor, progress }) {
+export default function CourseCard({ id, courseCode, term, title, instructor, progress }) {
     return (
         <div className={styles["course-card"]}>
             <div className={styles["course-card-header"]}>
@@ -26,7 +26,7 @@ export default function CourseCard({ courseCode, term, title, instructor, progre
                 </div>
             </div>
 
-            <Link href="/student/course" className="btn btn-outline btn-block">
+            <Link href={`/student/courses/${id}`} className="btn btn-outline btn-block">
                 View Course
             </Link>
         </div>

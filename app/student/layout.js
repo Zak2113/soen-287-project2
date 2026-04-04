@@ -13,18 +13,18 @@ export default function StudentLayout({ children }) {
       {/* 2. The Main Content Area (Rendered on the right) */}
       {/* Next.js injects the specific page.js content into this {children} variable */}
       <div className="main-wrapper">
-        <header class="top-header">
-                <div class="header-title">Student Portal</div>
+        <header className="top-header">
+                <div className="header-title">Student Portal</div>
                 
-                <div class="user-profile">
-                    <span class="user-name">Student User</span>
-                    <div class="user-avatar">
+                <div className="user-profile">
+                    <span className="user-name">Student User</span>
+                    <div className="user-avatar">
                         <Link href="/student/profile">SU</Link>
                     </div>
                 </div>
             </header>
         <main className="main-content">
-          {children}
+          <div className="content-area">{children}</div>
         </main>
       </div>
     </div>

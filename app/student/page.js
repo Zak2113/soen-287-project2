@@ -27,7 +27,7 @@ export default function StudentDashboard() {
 
   return (
     <>
-    <div className="content-area">
+    
       <div className="dashboard-header">
         {/* 2. THE DYNAMIC INJECTION */}
         {/* We use curly braces to inject the firstName property */}
@@ -50,6 +50,7 @@ export default function StudentDashboard() {
             {myCourses.map((course) => (
               <CourseCard 
                 key={course.id} 
+                id = {course.id}
                 courseCode={course.code} 
                 term={course.term} 
                 title={course.title} 
@@ -84,7 +85,7 @@ export default function StudentDashboard() {
         </section>
 
       </div>
-      </div>
+      
     </>
   );
 }
