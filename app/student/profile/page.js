@@ -1,29 +1,56 @@
-// app/student/settings/page.js
 "use client";
 
+import { useState, useTransition } from "react";
+import { useSession } from "next-auth/react";
+import { updateProfile, updatePassword } from "@/app/actions/profile"; // We'll create these
+
 export default function AccountSettingsPage() {
-  
-  // MOCK DATABASE DATA
-  // Later, this will be: const currentUser = await fetchUser(session.id);
-  const currentUser = {
-    firstName: "Zak",
-    lastName: "Abdi",
-    email: "zak.abdi211@gmail.com",
-    studentId: "1002345222",
-    // Dynamically grab the first letter of each name for the avatar
-    get initials() {
-      return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`;
+  const { data: session, update } = useSession();
+  const [isPending, startTransition] = useTransition();
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  // Get user from session or fallback to empty while loading
+  const user = session?.user || {};
+
+  // Dynamic Initials helper
+  const initials = (user.firstName?.[0] || "") + (user.lastName?.[0] || "");
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setMessage({ type: "", text: "" });
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      const result = await updateProfile(formData);
+      if (result?.success) {
+        setMessage({ type: "success", text: "Profile updated!" });
+        // This refreshes the client-side session so the sidebar name updates too
+        await update();
+      } else {
+        setMessage({ type: "error", text: result?.error || "Update failed." });
+      }
+    });
+  };
+
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    setMessage({ type: "", text: "" });
+    const formData = new FormData(e.currentTarget);
+
+    if (formData.get("newPassword").length < 8) {
+      setMessage({ type: "error", text: "New password must be 8+ characters." });
+      return;
     }
-  };
 
-  const handleProfileUpdate = (e) => {
-    e.preventDefault();
-    console.log("Profile updated!");
-  };
-
-  const handlePasswordUpdate = (e) => {
-    e.preventDefault();
-    console.log("Password updated!");
+    startTransition(async () => {
+      const result = await updatePassword(formData);
+      if (result?.success) {
+        setMessage({ type: "success", text: "Password changed successfully!" });
+        e.target.reset(); // Clear password fields
+      } else {
+        setMessage({ type: "error", text: result?.error || "Failed to update password." });
+      }
+    });
   };
 
   return (
@@ -33,14 +60,24 @@ export default function AccountSettingsPage() {
         <p>Manage your personal information and security preferences.</p>
       </div>
 
+      {/* Alert Message */}
+      {message.text && (
+        <div className={`alert ${message.type === "success" ? "alert-success" : "alert-error"}`}
+          style={{
+            padding: '10px', borderRadius: '5px', marginBottom: '20px',
+            backgroundColor: message.type === "success" ? "#2ecc71" : "#e74c3c", color: 'white'
+          }}>
+          {message.text}
+        </div>
+      )}
+
       {/* Personal Information Section */}
       <section className="profile-section">
         <div className="profile-header">
-          {/* Dynamic Initials */}
-          <div className="profile-avatar-large">{currentUser.initials}</div>
+          <div className="profile-avatar-large">{initials || "??"}</div>
           <div className="profile-title">
-            {/* Dynamic Full Name */}
-            <h3>{currentUser.firstName} {currentUser.lastName}</h3>
+            <h3>{user.firstName} {user.lastName}</h3>
+            <span className="badge">{user.role}</span>
           </div>
         </div>
 
@@ -48,27 +85,29 @@ export default function AccountSettingsPage() {
           <div className="profile-grid">
             <div className="form-group">
               <label htmlFor="firstName" className="form-label">First Name</label>
-              {/* Dynamic Default Values injected from the object */}
-              <input type="text" id="firstName" name="firstName" className="form-control" defaultValue={currentUser.firstName} required />
+              <input type="text" id="firstName" name="firstName" className="form-control" defaultValue={user.firstName} required />
             </div>
 
             <div className="form-group">
               <label htmlFor="lastName" className="form-label">Last Name</label>
-              <input type="text" id="lastName" name="lastName" className="form-control" defaultValue={currentUser.lastName} required />
+              <input type="text" id="lastName" name="lastName" className="form-control" defaultValue={user.lastName} required />
             </div>
 
             <div className="form-group">
               <label htmlFor="email" className="form-label">Email</label>
-              <input type="email" id="email" name="email" className="form-control" defaultValue={currentUser.email} />
+              <input type="email" id="email" name="email" className="form-control" defaultValue={user.email} required />
             </div>
 
             <div className="form-group">
-              <label htmlFor="studentId" className="form-label">Student ID</label>
-              <input type="text" id="studentId" name="studentId" className="form-control" defaultValue={currentUser.studentId} disabled />
+              <label htmlFor="studentId" className="form-label">User ID</label>
+              <input type="text" id="studentId" className="form-control" defaultValue={user.studentId} disabled />
+              <small>ID cannot be changed.</small>
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Save Changes</button>
+          <button type="submit" disabled={isPending} className="btn btn-primary" style={{ marginTop: '1rem' }}>
+            {isPending ? "Saving..." : "Save Changes"}
+          </button>
         </form>
       </section>
 
@@ -82,7 +121,6 @@ export default function AccountSettingsPage() {
           <div className="profile-grid">
             <div className="form-group">
               <label htmlFor="currentPassword" className="form-label">Current Password</label>
-              {/* Passwords remain blank placeholders for security */}
               <input type="password" id="currentPassword" name="currentPassword" className="form-control" placeholder="••••••••" required />
             </div>
 
@@ -92,7 +130,9 @@ export default function AccountSettingsPage() {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-outline">Update Password</button>
+          <button type="submit" disabled={isPending} className="btn btn-outline">
+            Update Password
+          </button>
         </form>
       </section>
     </>

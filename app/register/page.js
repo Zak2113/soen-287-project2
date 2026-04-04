@@ -11,29 +11,40 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error
-    
+    setError("");
+    setFieldErrors({}); // Clear previous Zod errors
+
     const formData = new FormData(e.currentTarget);
-    
-    // Client-side validation check
+
+    // 1. Client-Side Match Check
     if (formData.get("password") !== formData.get("confirmPassword")) {
-      setError("Passwords do not match.");
+      setError("Validation failed.");
+      setFieldErrors({ confirmPassword: ["Passwords do not match."] }); 
       return;
     }
 
     startTransition(async () => {
-      // Call the Server Action
+      // 2. Call Server Action
       const result = await registerUser(formData);
-      
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        // Success! The action handles the redirect, but we can 
-        // also push manually if we want a specific path.
+
+      // 3. Handle Responses
+      if (result?.success) {
         router.push('/login?registered=true');
+      }
+      else if (result?.errors) {
+        // SAVE ZOD ERRORS TO STATE so the JSX can see them
+        setFieldErrors(result.errors);
+        setError("Validation failed. Please check the requirements below.");
+      }
+      else if (result?.error) {
+        setError(result.error);
+      }
+      else {
+        setError(result?.message || "An unexpected error occurred.");
       }
     });
   };
@@ -41,7 +52,7 @@ export default function RegisterPage() {
   return (
     <div className={styles["auth-wrapper"]}>
       <div className={styles["auth-card"]}>
-        
+
         <div className={styles["auth-header"]}>
           <Link href="/" className="brand-logo">
             Noodle<span className="brand-accent">.</span>
@@ -49,11 +60,22 @@ export default function RegisterPage() {
           <h2>Register for an account</h2>
         </div>
 
-        {/* Display Error Message if it exists */}
-        {error && (
-          <div style={{ color: 'white', background: '#e74c3c', padding: '10px', borderRadius: '5px', marginBottom: '15px', textAlign: 'center' }}>
-            {error}
-          </div>
+        {/* Specific Zod Bullet Points */}
+        {Object.keys(fieldErrors).length > 0 && (
+          <ul style={{
+            color: 'white',
+            background: '#e74c3c',
+            padding: '10px',
+            borderRadius: '5px',
+            listStyle: 'inside',
+            marginBottom: '15px'
+          }}>
+            {Object.values(fieldErrors).flat().map((err, i) => (
+              <li key={i} style={{ fontSize: '0.85rem', marginBottom: '4px' }}>
+                {err}
+              </li>
+            ))}
+          </ul>
         )}
 
         <form onSubmit={handleRegister} className={styles["login-form"]}>
@@ -91,8 +113,8 @@ export default function RegisterPage() {
             </select>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn btn-primary btn-block"
             disabled={isPending}
           >
