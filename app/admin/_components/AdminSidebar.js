@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTransition } from 'react'; // Added for loading state
 import { logoutUser } from '@/app/actions/auth'; // Import your logout action
+import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function AdminSidebar() {
         <Link href="/" className="brand-logo">
           Noodle<span className="brand-accent">.</span>
         </Link>
+        <ThemeToggle />
       </div>
 
       <nav className="sidebar-nav">
