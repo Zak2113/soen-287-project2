@@ -100,7 +100,7 @@ export default function LoginPage() {
 
         <div className={styles["auth-footer"]}>
           <p><Link href="/forgot-password" className={styles["text-link"]}>Forgot your password?</Link></p>
-          <p>Don't have an account? <Link href="/register" className={styles["text-link"]}>Register here</Link>.</p>
+          <p>Don&apos;t have an account? <Link href="/register" className={styles["text-link"]}>Register here</Link>.</p>
         </div>
       </div>
     </div>

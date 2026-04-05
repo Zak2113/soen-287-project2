@@ -1,5 +1,6 @@
 // app/student/grades/page.js
 import CourseGradesCard from '../_components/CourseGradesCard';
+import ExportGradesPDF from '../_components/ExportGradesPDF';
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { courses, users, enrollments, assessments, grades } from "@/db/schema";
@@ -123,8 +124,16 @@ export default async function GradesPage() {
   return (
     <>
       <div className="dashboard-header">
-        <h2>My Grades</h2>
-        <p>Review your completed assessments and current standing across all enrolled courses.</p>
+        <div>
+          <h2>My Grades</h2>
+          <p>Review your completed assessments and current standing across all enrolled courses.</p>
+        </div>
+        {myGradesData.length > 0 && (
+          <ExportGradesPDF
+            gradesData={myGradesData}
+            studentName={`${session.user.firstName} ${session.user.lastName}`}
+          />
+        )}
       </div>
 
       <div className="grades-container">

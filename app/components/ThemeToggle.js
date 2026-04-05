@@ -4,7 +4,20 @@ import { useTheme } from "./ThemeProvider";
 import styles from "./ThemeToggle.module.css";
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <button
+        className={styles.toggle}
+        disabled
+        aria-label="Loading theme toggle"
+      >
+        "Dark Mode"
+      </button>
+    );
+  }
 
   return (
     <button

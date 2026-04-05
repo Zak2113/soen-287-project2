@@ -545,6 +545,13 @@ a {
 /* --- DASHBOARD SPECIFIC UTILITIES --- */
 .dashboard-header {
     margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.dashboard-header > div:first-child {
+    flex: 1;
 }
 
 .dashboard-header h2 {
