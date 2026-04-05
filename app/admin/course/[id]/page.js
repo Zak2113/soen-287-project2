@@ -1,11 +1,10 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-// 1. Import assessments from schema
-import { courses, assessments } from "@/db/schema";
+// 1. Added enrollments to the schema imports
+import { courses, assessments, enrollments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-// 2. Import the client components
 import CreateAssessmentForm from "./_components/CreateAssessmentForm";
 import AssessmentRow from "./_components/AssessmentRow";
 
@@ -19,6 +18,12 @@ function parseDateForUI(dateString) {
     day: date.getDate().toString().padStart(2, '0')          // e.g., "14"
   };
 }
+
+// Dictionary to translate DB codes to readable full text
+const termMap = {
+  "F": "Fall", "W": "Winter", "FW": "Fall/Winter",
+  "S": "Summer Full", "S1": "Summer 1", "S2": "Summer 2"
+};
 
 export default async function CourseManagementPage({ params }) {
   // Security Check
@@ -61,7 +66,15 @@ export default async function CourseManagementPage({ params }) {
     );
   }
 
-  // 3. Fetch all assessments tied to this specific course
+  // Fetch all enrollments tied to this course to get the live student count
+  const courseEnrollments = await db
+    .select()
+    .from(enrollments)
+    .where(eq(enrollments.courseId, courseId));
+    
+  const studentCount = courseEnrollments.length;
+
+  // Fetch all assessments tied to this specific course
   const courseAssessments = await db
     .select()
     .from(assessments)
@@ -76,12 +89,13 @@ export default async function CourseManagementPage({ params }) {
       <div className="dashboard-header flex-between" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2>Manage: {course.title} <span className="course-code">{course.code}</span></h2>
-          <p>{course.term} - 0 Students Enrolled</p>
+          {/* Dynamically displaying the full term name and the real student count */}
+          <p>{termMap[course.term] || course.term} - {studentCount} {studentCount === 1 ? 'Student' : 'Students'} Enrolled</p>
         </div>
         <button className="btn btn-outline">Disable Course</button>
       </div>
 
-      {/* 4. Inject the interactive Client Component Form here */}
+      {/* Inject the interactive Client Component Form here */}
       <CreateAssessmentForm courseId={courseId} />
 
       <div className="section-header" style={{ marginTop: '3rem' }}>
@@ -90,7 +104,7 @@ export default async function CourseManagementPage({ params }) {
 
       <div className="assessment-list">
         {courseAssessments.length === 0 ? (
-          <p style={{ color: '#666', fontStyle: 'italic', padding: '20px 0' }}>No assessments have been added to this course yet.</p>
+          <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '20px 0' }}>No assessments have been added to this course yet.</p>
         ) : (
           courseAssessments.map((assessment) => {
             // Parse the date for each assessment
