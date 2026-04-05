@@ -35,8 +35,18 @@ export const courses = sqliteTable("courses", {
 // This is a "Join Table". It connects a Student to a Course.
 export const enrollments = sqliteTable("enrollments", {
   id: text("id").primaryKey(),
-  studentId: text("student_id").notNull().references(() => users.id),
-  courseId: text("course_id").notNull().references(() => courses.id),
+  
+  // Link to the student
+  studentId: text("student_id")
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+    
+  // Link to the course
+  courseId: text("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: 'cascade' }),
+    
+  enrolledAt: text("enrolled_at").notNull(), 
 });
 
 // 4. ASSESSMENTS TABLE

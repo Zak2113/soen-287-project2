@@ -1,23 +1,60 @@
 // app/student/courses/[courseId]/page.js
 import Link from 'next/link';
 import CourseAssessmentItem from '../../_components/CourseAssessmentItem';
+import { auth } from "@/auth";
+import { db } from "@/db";
+import { courses, users, enrollments, assessments } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 export default async function CourseDetail({ params }) {
-  const { courseId } = await params;
+  // 1. Security Check
+  const session = await auth();
+  if (!session?.user || session.user.role !== "student") {
+    redirect("/login");
+  }
 
-  // MOCK DATA
-  const courseDetails = {
-    code: "SOEN 287",
-    title: "Web Development",
-    instructor: "Prof. Mohammad Bashar",
-    currentAverage: 88,
-  };
+  const resolvedParams = await params;
+  const courseId = resolvedParams.courseId;
 
-  const assessments = [
-    { id: 1, title: "Firewall Configuration Lab", weight: 20, status: "Pending" },
-    { id: 2, title: "Cryptography Quiz", weight: 10, status: "Completed", earned: 90, total: 100 },
-    { id: 3, title: "Final Project Proposal", weight: 15, status: "Pending" }
-  ];
+  // 2. Fetch Course & Verify Enrollment (IDOR Protection)
+  // This query only returns a result if the student is actively enrolled
+  const [enrollmentRecord] = await db
+    .select({
+      course: courses,
+      instructor: users,
+    })
+    .from(enrollments)
+    .innerJoin(courses, eq(enrollments.courseId, courses.id))
+    .leftJoin(users, eq(courses.instructorId, users.id))
+    .where(
+      and(
+        eq(enrollments.studentId, session.user.id),
+        eq(enrollments.courseId, courseId)
+      )
+    );
+
+  // If no record is found, they aren't enrolled (or the course doesn't exist)
+  if (!enrollmentRecord) {
+    return (
+      <div className="dashboard-header">
+        <h2>Access Denied</h2>
+        <p>You are not enrolled in this course, or it does not exist.</p>
+        <Link href="/student" className="btn btn-outline" style={{ marginTop: '1rem' }}>
+          Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  const { course, instructor } = enrollmentRecord;
+  const instructorName = instructor ? `${instructor.firstName} ${instructor.lastName}` : "Unknown";
+
+  // 3. Fetch real assessments for this course
+  const courseAssessments = await db
+    .select()
+    .from(assessments)
+    .where(eq(assessments.courseId, courseId));
 
   return (
     <div>
@@ -26,18 +63,13 @@ export default async function CourseDetail({ params }) {
         <Link href="/student" className="login-link">&larr; Back to Dashboard</Link>
       </div>
 
-      {/* Course Header & Actions - Relying entirely on your flex-between class */}
+      {/* Course Header */}
       <div className="dashboard-header flex-between">
         <div>
-          <h2>{courseDetails.title} <span className="course-code">{courseDetails.code}</span></h2>
-          <p>{courseDetails.instructor}</p>
+          <h2>{course.title} <span className="course-code">{course.code}</span></h2>
+          <p>Prof. {instructorName}</p>
         </div>
-        <div className="action-group">
-          <button className="btn btn-primary btn-sm"><Link href={`/student/courses/${courseId}/edit`}>
-            Edit Course
-          </Link></button>
-          <button className="btn btn-primary btn-sm">Hide Course</button>
-        </div>
+        {/* Admin buttons successfully removed from student view */}
       </div>
 
       {/* Course Progress Summary */}
@@ -45,33 +77,38 @@ export default async function CourseDetail({ params }) {
         <div className="course-progress">
           <div className="progress-info">
             <span>Current Overall Average</span>
-            <strong>{courseDetails.currentAverage}%</strong>
+            {/* Hardcoded at 0% until we build the grading system */}
+            <strong>0%</strong>
           </div>
           <div className="progress-bar">
-            {/* This is the ONLY inline style that must stay, as it requires live JS data */}
-            <div className="progress-fill" style={{ width: `${courseDetails.currentAverage}%` }}></div>
+            <div className="progress-fill" style={{ width: `0%` }}></div>
           </div>
         </div>
       </section>
 
       {/* Assessments Header */}
-      <div className="section-header">
+      <div className="section-header" style={{ marginTop: '2rem' }}>
         <h3>Course Assessments</h3>
-        <button className="btn btn-primary btn-sm">Add Assessment</button>
       </div>
 
       {/* Assessments List */}
       <div className="assessment-list">
-        {assessments.map((item) => (
-          <CourseAssessmentItem 
-            key={item.id}
-            title={item.title}
-            weight={item.weight}
-            status={item.status}
-            earned={item.earned}
-            total={item.total}
-          />
-        ))}
+        {courseAssessments.length === 0 ? (
+          <div style={{ padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #eaeaea' }}>
+            <p style={{ color: '#666', fontStyle: 'italic' }}>No assessments have been posted for this course yet.</p>
+          </div>
+        ) : (
+          courseAssessments.map((item) => (
+            <CourseAssessmentItem 
+              key={item.id}
+              title={item.title}
+              weight={item.weight}
+              status="Pending" // Defaulted to Pending until grading is implemented
+              earned={null}
+              total={null}
+            />
+          ))
+        )}
       </div>
     </div>
   );

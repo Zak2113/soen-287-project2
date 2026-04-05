@@ -2,36 +2,117 @@
 import Link from 'next/link';
 import CourseCard from './_components/CourseCard';
 import AssessmentItem from './_components/AssessmentItem';
+import { auth } from "@/auth";
+import { db } from "@/db";
+// 1. Added assessments to the schema import
+import { courses, users, enrollments, assessments } from "@/db/schema";
+// 2. Added `asc` so we can sort deadlines chronologically
+import { eq, asc } from "drizzle-orm"; 
+import { redirect } from "next/navigation";
 
-export default function StudentDashboard() {
+// Dictionary to translate DB codes to readable text
+const termMap = {
+  "F": "Fall", "W": "Winter", "FW": "Fall/Winter",
+  "S": "Summer Full", "S1": "Summer 1", "S2": "Summer 2"
+};
 
-  // 1. SIMULATED DATABASE DATA
-  // In the future, this will be replaced with: const courses = await db.getCourses(userId);
-  const currentUser = {
-    firstName: "Student",
-    role: "student"
+// Helper function for the date UI
+function parseDateForUI(dateString) {
+  if (!dateString) return { month: "TBD", day: "--" };
+  const [year, month, day] = dateString.split('-');
+  const date = new Date(year, month - 1, day);
+  return {
+    month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase(), 
+    day: date.getDate().toString().padStart(2, '0')          
   };
+}
 
-  const myCourses = [
-    { id: 1, code: "SOEN 287", term: "Winter 2026", title: "Web Development", instructor: "Prof. Mohammad Bashar", progress: 55 },
-    { id: 2, code: "COMP 233", term: "Winter 2026", title: "Probability & Statistics", instructor: "Prof. Thomas Fevens", progress: 56 },
-    // You can add a third one here just to see it automatically appear!
-    { id: 3, code: "ENCS 282", term: "Winter 2026", title: "Technical Writing", instructor: "Prof. Jane Doe", progress: 12 } ,
+export default async function StudentDashboard() {
+  const session = await auth();
+  
+  if (!session?.user || session.user.role !== "student") {
+    redirect("/login");
+  }
+
+  const firstName = session.user.firstName || "Student";
+
+  // ---------------------------------------------------------
+  // 1. FETCH ENROLLED COURSES
+  // ---------------------------------------------------------
+  const enrolledCoursesData = await db
+    .select({
+      course: courses,
+      instructor: users,
+    })
+    .from(enrollments)
+    .innerJoin(courses, eq(enrollments.courseId, courses.id))
+    .leftJoin(users, eq(courses.instructorId, users.id))
+    .where(eq(enrollments.studentId, session.user.id));
+
+  const myCourses = enrolledCoursesData.map((row) => {
+    const { course, instructor } = row;
+    const instructorName = instructor ? `${instructor.firstName} ${instructor.lastName}` : "Unknown";
+
+    return {
+      id: course.id,
+      code: course.code,
+      term: termMap[course.term] || course.term,
+      title: course.title,
+      instructor: `Prof. ${instructorName}`,
+      progress: 0 
+    };
+  });
+
+  // ---------------------------------------------------------
+  // 2. FETCH REAL ASSESSMENTS (The "Triple Join")
+  // ---------------------------------------------------------
+  const rawAssessments = await db
+    .select({
+      assessment: assessments,
+      courseCode: courses.code, // We just need the course code for the UI
+    })
+    .from(assessments)
+    .innerJoin(courses, eq(assessments.courseId, courses.id))
+    .innerJoin(enrollments, eq(courses.id, enrollments.courseId))
+    .where(eq(enrollments.studentId, session.user.id))
+    .orderBy(asc(assessments.date)); // Put the closest deadlines at the top!
+
+  // Setup today's date at midnight for accurate "Late" calculations
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Map the raw DB data into the exact format your AssessmentItem component needs
+  const myDeadlines = rawAssessments.map((row) => {
+    const { month, day } = parseDateForUI(row.assessment.date);
     
-  ];
+    // Calculate if it's late or due soon
+    const assessmentDate = new Date(row.assessment.date);
+    const isLate = assessmentDate < today;
+    
+    // Calculate days between today and the due date
+    const diffTime = assessmentDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  const myDeadlines = [
-    { id: 101, month: "FEB", day: "23", title: "Problem Set 3", course: "COMP 233", status: "Late", isLate: true },
-    { id: 102, month: "FEB", day: "27", title: "SOEN 287 Project - Deliverable 1", course: "SOEN 287", status: "Due Soon", isLate: false }
-  ];
+    // Dynamic Status text
+    let status = "Upcoming";
+    if (isLate) status = "Past Due";
+    else if (diffDays <= 3) status = "Due Soon";
+
+    return {
+      id: row.assessment.id,
+      month,
+      day,
+      title: row.assessment.title,
+      course: row.courseCode, // e.g., "SOEN 287"
+      status,
+      isLate,
+    };
+  });
 
   return (
     <>
-    
       <div className="dashboard-header">
-        {/* 2. THE DYNAMIC INJECTION */}
-        {/* We use curly braces to inject the firstName property */}
-        <h2>Welcome back, {currentUser.firstName}!</h2>
+        <h2>Welcome back, {firstName}!</h2>
         <p>You have {myDeadlines.length} upcoming assignments due this week.</p>
       </div>
 
@@ -45,19 +126,23 @@ export default function StudentDashboard() {
           </div>
           
           <div className="course-cards">
-            {/* 2. THE MAGIC LOOP */}
-            {/* We map over the array and return a CourseCard for every object */}
-            {myCourses.map((course) => (
-              <CourseCard 
-                key={course.id} 
-                id = {course.id}
-                courseCode={course.code} 
-                term={course.term} 
-                title={course.title} 
-                instructor={course.instructor} 
-                progress={course.progress} 
-              />
-            ))}
+            {myCourses.length === 0 ? (
+              <div style={{ padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #eaeaea' }}>
+                <p style={{ color: '#666', fontStyle: 'italic' }}>You are not enrolled in any courses yet.</p>
+              </div>
+            ) : (
+              myCourses.map((course) => (
+                <CourseCard 
+                  key={course.id} 
+                  id={course.id}
+                  courseCode={course.code} 
+                  term={course.term} 
+                  title={course.title} 
+                  instructor={course.instructor} 
+                  progress={course.progress} 
+                />
+              ))
+            )}
           </div>
         </section>
 
@@ -69,23 +154,27 @@ export default function StudentDashboard() {
           </div>
           
           <div className="assessment-list">
-            {/* 3. MAPPING THE DEADLINES */}
-            {myDeadlines.map((item) => (
-              <AssessmentItem 
-                key={item.id}
-                month={item.month} 
-                day={item.day} 
-                title={item.title} 
-                course={item.course} 
-                status={item.status} 
-                isLate={item.isLate} 
-              />
-            ))}
+            {myDeadlines.length === 0 ? (
+              <div style={{ padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #eaeaea', textAlign: 'center' }}>
+                <p style={{ color: '#666', fontStyle: 'italic' }}>No upcoming deadlines!</p>
+              </div>
+            ) : (
+              myDeadlines.map((item) => (
+                <AssessmentItem 
+                  key={item.id}
+                  month={item.month} 
+                  day={item.day} 
+                  title={item.title} 
+                  course={item.course} 
+                  status={item.status} 
+                  isLate={item.isLate} 
+                />
+              ))
+            )}
           </div>
         </section>
 
       </div>
-      
     </>
   );
 }
