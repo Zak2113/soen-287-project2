@@ -1,22 +1,11 @@
 // app/page.js
 import Link from 'next/link';
+import Navbar from './components/Navbar';
 
 export default function LandingPage() {
   return (
     <>
-      <header className="navbar">
-        <div className="container">
-          {/* Points to the root URL */}
-          <Link href="/" className="brand-logo">
-            Noodle<span className="brand-accent">.</span>
-          </Link>
-          <nav className="nav-links">
-            {/* Pointing directly to your new auth routes */}
-            <Link href="/login" className="login-link">Sign In</Link>
-            <Link href="/register" className="btn btn-primary">Register</Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main>
         <section className="hero">

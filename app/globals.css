@@ -4,13 +4,40 @@
     --accent-orange: #ea580c;
     --accent-orange-hover: #c2410c;
     --bg-light: #f8fafc;
+    --bg-secondary: #f1f5f9;
     --text-main: #334155;
     --text-muted: #64748b;
     --white: #ffffff;
+    --surface: #ffffff;
     --border-color: #e2e8f0;
     --dev-bg: #fffbeb;
     --dev-border: #fcd34d;
     --dev-text: #b45309;
+}
+
+/* --- DARK MODE VARIABLES --- */
+html[data-theme="dark"] {
+    --primary-blue: #d1d5db;
+    --accent-orange: #ea580c;
+    --accent-orange-hover: #c2410c;
+    --bg-light: #090a0f;
+    --bg-secondary: #111827;
+    --surface: #111827;
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --white: #ffffff;
+    --border-color: #334155;
+    --dev-bg: #111827;
+    --dev-border: #475569;
+    --dev-text: #f8fafc;
+}
+
+html[data-theme="dark"] .sidebar {
+    background-color: var(--bg-secondary);
+}
+
+html[data-theme="dark"] .hero {
+    background-color: var(--bg-secondary);
 }
 
 /* --- GLOBAL RESET --- */
@@ -77,7 +104,7 @@ a {
 
 /* --- NAVBAR --- */
 .navbar {
-    background-color: var(--white);
+    background-color: var(--surface);
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 0;
     position: sticky;
@@ -186,7 +213,7 @@ a {
 }
 
 .btn-dev {
-    background-color: var(--white);
+    background-color: var(--surface);
     border: 1px solid var(--dev-border);
     color: var(--dev-text);
 }
@@ -216,7 +243,7 @@ a {
 }
 
 .feature-card {
-    background-color: var(--white);
+    background-color: var(--surface);
     padding: 2rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -241,7 +268,7 @@ a {
 
 /* --- FOOTER --- */
 .footer {
-    background-color: var(--white);
+    background-color: var(--surface);
     border-top: 1px solid var(--border-color);
     padding: 2rem 0;
     text-align: center;
@@ -277,7 +304,7 @@ a {
 }
 
 .auth-card {
-    background-color: var(--white);
+    background-color: var(--surface);
     width: 100%;
     max-width: 450px;
     padding: 2.5rem;
@@ -469,7 +496,7 @@ a {
 /* --- TOP HEADER --- */
 .top-header {
     height: 70px;
-    background-color: var(--white);
+    background-color: var(--surface);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -518,6 +545,13 @@ a {
 /* --- DASHBOARD SPECIFIC UTILITIES --- */
 .dashboard-header {
     margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.dashboard-header > div:first-child {
+    flex: 1;
 }
 
 .dashboard-header h2 {
@@ -587,7 +621,7 @@ a {
 }
 
 .course-card {
-    background-color: var(--white);
+    background-color: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1.5rem;
@@ -684,7 +718,7 @@ a {
 }
 
 .assessment-item {
-    background-color: var(--white);
+    background-color: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1rem;
@@ -758,7 +792,7 @@ a {
 }
 
 .add-course-card {
-    background-color: var(--white);
+    background-color: var(--surface);
     width: 100%;
     
     padding: 2.5rem;
@@ -808,7 +842,7 @@ a {
 
 /* --- PROFILE SPECIFIC --- */
 .profile-section {
-    background-color: var(--white);
+    background-color: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 2rem;
