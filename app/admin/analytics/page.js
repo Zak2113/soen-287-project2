@@ -30,7 +30,7 @@ export default async function AdminAnalyticsPage() {
       <div style={{ padding: '40px', textAlign: 'center', background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
         <h2 style={{ color: 'var(--text-main)', marginBottom: '10px' }}>Admin Analytics</h2>
         <p style={{ color: 'var(--text-muted)' }}>You do not have any active courses to analyze right now.</p>
-        <Link href="/admin/add-course" className="btn btn-primary" style={{ marginTop: '15px' }}>
+        <Link href="/admin/create-course" className="btn btn-primary" style={{ marginTop: '15px' }}>
           Create Course
         </Link>
       </div>
