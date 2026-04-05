@@ -3,7 +3,8 @@ import Link from 'next/link';
 import CourseAssessmentItem from '../../_components/CourseAssessmentItem';
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { courses, users, enrollments, assessments } from "@/db/schema";
+// Added grades to the schema import
+import { courses, users, enrollments, assessments, grades } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -18,7 +19,6 @@ export default async function CourseDetail({ params }) {
   const courseId = resolvedParams.courseId;
 
   // 2. Fetch Course & Verify Enrollment (IDOR Protection)
-  // This query only returns a result if the student is actively enrolled
   const [enrollmentRecord] = await db
     .select({
       course: courses,
@@ -50,11 +50,40 @@ export default async function CourseDetail({ params }) {
   const { course, instructor } = enrollmentRecord;
   const instructorName = instructor ? `${instructor.firstName} ${instructor.lastName}` : "Unknown";
 
-  // 3. Fetch real assessments for this course
-  const courseAssessments = await db
-    .select()
+  // 3. Fetch assessments AND the student's specific grades
+  const assessmentsWithGrades = await db
+    .select({
+      assessment: assessments,
+      grade: grades,
+    })
     .from(assessments)
+    // LEFT JOIN because an assessment exists even if a grade doesn't yet!
+    .leftJoin(
+      grades,
+      and(
+        eq(grades.assessmentId, assessments.id),
+        eq(grades.studentId, session.user.id) // Only pull grades for THIS student
+      )
+    )
     .where(eq(assessments.courseId, courseId));
+
+  // 4. Calculate the live course average
+  let totalWeightedScore = 0;
+  let totalAttemptedWeight = 0;
+
+  assessmentsWithGrades.forEach((row) => {
+    const { assessment, grade } = row;
+    if (grade?.earned !== undefined && grade?.earned !== null) {
+      const percentage = grade.earned / grade.total;
+      totalWeightedScore += percentage * assessment.weight;
+      totalAttemptedWeight += assessment.weight;
+    }
+  });
+
+  // Prevent division by zero if they haven't submitted anything yet
+  const currentAverage = totalAttemptedWeight > 0 
+    ? ((totalWeightedScore / totalAttemptedWeight) * 100).toFixed(1) 
+    : 0;
 
   return (
     <div>
@@ -69,7 +98,6 @@ export default async function CourseDetail({ params }) {
           <h2>{course.title} <span className="course-code">{course.code}</span></h2>
           <p>Prof. {instructorName}</p>
         </div>
-        {/* Admin buttons successfully removed from student view */}
       </div>
 
       {/* Course Progress Summary */}
@@ -77,12 +105,17 @@ export default async function CourseDetail({ params }) {
         <div className="course-progress">
           <div className="progress-info">
             <span>Current Overall Average</span>
-            {/* Hardcoded at 0% until we build the grading system */}
-            <strong>0%</strong>
+            <strong>{currentAverage}%</strong>
           </div>
           <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `0%` }}></div>
+            {/* The width now dynamically grows as their average changes! */}
+            <div className="progress-fill" style={{ width: `${currentAverage}%` }}></div>
           </div>
+          {totalAttemptedWeight > 0 && (
+            <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#666' }}>
+              Based on {totalAttemptedWeight}% of the total course weight completed.
+            </div>
+          )}
         </div>
       </section>
 
@@ -93,21 +126,27 @@ export default async function CourseDetail({ params }) {
 
       {/* Assessments List */}
       <div className="assessment-list">
-        {courseAssessments.length === 0 ? (
+        {assessmentsWithGrades.length === 0 ? (
           <div style={{ padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #eaeaea' }}>
             <p style={{ color: '#666', fontStyle: 'italic' }}>No assessments have been posted for this course yet.</p>
           </div>
         ) : (
-          courseAssessments.map((item) => (
-            <CourseAssessmentItem 
-              key={item.id}
-              title={item.title}
-              weight={item.weight}
-              status="Pending" // Defaulted to Pending until grading is implemented
-              earned={null}
-              total={null}
-            />
-          ))
+          assessmentsWithGrades.map((row) => {
+            const { assessment, grade } = row;
+            
+            return (
+              <CourseAssessmentItem 
+                key={assessment.id}
+                assessmentId={assessment.id}
+                courseId={courseId}
+                title={assessment.title}
+                weight={assessment.weight}
+                status={grade?.earned !== undefined && grade?.earned !== null ? "Completed" : "Pending"}
+                earned={grade?.earned ?? null} // Pass the real grade, or null if unsubmitted
+                total={grade?.total ?? 100}
+              />
+            );
+          })
         )}
       </div>
     </div>

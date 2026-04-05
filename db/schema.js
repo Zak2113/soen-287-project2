@@ -71,7 +71,7 @@ export const assessments = sqliteTable("assessments", {
 export const grades = sqliteTable("grades", {
   id: text("id").primaryKey(),
   studentId: text("student_id").notNull().references(() => users.id),
-  assessmentId: text("assessment_id").notNull().references(() => assessments.id),
+  assessmentId: text("assessment_id").notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   earned: real("earned"), 
   total: real("total").default(100).notNull(),
   // Makes it easy to filter "Completed" vs "Incomplete" in your UI
