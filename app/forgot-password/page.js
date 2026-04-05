@@ -7,17 +7,28 @@ import styles from './forgot-password.module.css';
 
 export default function ForgotPasswordPage() {
 
-  const handleReset = (e) => {
-    e.preventDefault(); 
-    
-    // Grab the email
-    const email = e.target.email.value;
-    
-    // In the future, this will call your backend action.
-    // For now, we'll just log it and maybe alert the user.
-    console.log(`Password reset link sent to: ${email}`);
-    alert("If an account exists, a reset link has been sent.");
-  };
+  const handleReset = async (e) => {
+  e.preventDefault();
+
+  const email = e.target.email.value;
+
+  try {
+    const res = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    alert(data.message); // shows backend message
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong.");
+  }
+};
 
   return (
     <div className={styles["auth-wrapper"]}>

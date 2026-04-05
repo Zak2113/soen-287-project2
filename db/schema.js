@@ -11,6 +11,8 @@ export const users = sqliteTable("users", {
   password: text("password").notNull(), 
   role: text("role").default("student").notNull(), // "student" or "admin"
   studentId: text("student_id"), // Admins can leave this blank
+  resetToken: text("reset_token"),
+  resetTokenExpiry: text("reset_token_expiry"),
 });
 
 export const courses = sqliteTable("courses", {
