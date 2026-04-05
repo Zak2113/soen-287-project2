@@ -1,4 +1,3 @@
-// app/student/calendar/_components/CalendarWidget.js
 "use client";
 
 import { useState } from "react";
@@ -21,7 +20,6 @@ export default function CalendarWidget({ assessments }) {
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
 
-  // Get midnight today so we can accurately check if something is overdue
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -34,8 +32,9 @@ export default function CalendarWidget({ assessments }) {
     groupedAssessments[assessment.date].push(assessment);
   });
 
+  // Uses your --bg-light variable for empty calendar days
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => (
-    <div key={`blank-${i}`} style={{ background: '#f8f9fa', borderRadius: '4px', minHeight: '120px' }}></div>
+    <div key={`blank-${i}`} style={{ backgroundColor: 'var(--bg-light)', borderRadius: '6px', minHeight: '120px' }}></div>
   ));
 
   const days = Array.from({ length: daysInMonth }, (_, i) => {
@@ -46,33 +45,39 @@ export default function CalendarWidget({ assessments }) {
     return (
       <div 
         key={dayNum} 
-        style={{ border: '1px solid #eaeaea', borderRadius: '4px', minHeight: '120px', padding: '10px', background: '#fff', display: 'flex', flexDirection: 'column' }}
+        style={{ 
+          backgroundColor: 'var(--surface)', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '6px', 
+          minHeight: '120px', 
+          padding: '10px', 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}
       >
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#666' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
           {dayNum}
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flexGrow: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}>
           {dayAssessments.map((a) => {
-            
-            // 🚨 THE COLOR LOGIC 🚨
             const isCompleted = a.earned !== null && a.earned !== undefined;
             const assessmentDate = new Date(a.date);
-            // We have to add a day to the parsed date to fix timezone offset issues
             assessmentDate.setDate(assessmentDate.getDate() + 1); 
             assessmentDate.setHours(0, 0, 0, 0);
             
             const isOverdue = !isCompleted && assessmentDate < today;
 
-            // Default Blue (Upcoming)
-            let bg = '#e8f4fd', text = '#2980b9', border = '#3498db'; 
+            // 🚨 Relying entirely on YOUR existing status classes 🚨
+            let statusClass = "status-due-soon";
+            let statusText = "Upcoming";
             
             if (isCompleted) {
-              // Green (Submitted/Done)
-              bg = '#eafaf1'; text = '#27ae60'; border = '#2ecc71'; 
+              statusClass = "status-graded";
+              statusText = "Done";
             } else if (isOverdue) {
-              // Red (Missed Deadline!)
-              bg = '#fdedec'; text = '#c0392b'; border = '#e74c3c'; 
+              statusClass = "status-pending";
+              statusText = "Overdue";
             }
 
             return (
@@ -80,19 +85,27 @@ export default function CalendarWidget({ assessments }) {
                 key={a.id} 
                 href={`/student/courses/${a.courseId}`} 
                 style={{ 
-                  display: 'block', 
-                  fontSize: '0.75rem', 
-                  padding: '6px', 
-                  background: bg,        // Dynamic
-                  color: text,           // Dynamic
-                  borderLeft: `3px solid ${border}`, // Dynamic
-                  borderRadius: '4px', 
-                  textDecoration: 'none', 
-                  lineHeight: '1.2'
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '6px', 
+                  padding: '8px', 
+                  backgroundColor: 'var(--bg-light)', 
+                  border: '1px solid var(--border-color)', 
+                  borderRadius: '4px',
                 }}
               >
-                <strong style={{ display: 'block', marginBottom: '2px' }}>{a.courseCode}</strong>
-                <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* Reusing your .course-code class */}
+                  <span className="course-code" style={{ fontSize: '0.65rem', padding: '2px 4px' }}>
+                    {a.courseCode}
+                  </span>
+                  {/* Reusing your .status-badge classes */}
+                  <span className={`status-badge ${statusClass}`} style={{ fontSize: '0.6rem', padding: '2px 6px' }}>
+                    {statusText}
+                  </span>
+                </div>
+                {/* Reusing your .assessment-title class */}
+                <span className="assessment-title" style={{ fontSize: '0.8rem', lineHeight: '1.2' }}>
                   {a.title}
                 </span>
               </Link>
@@ -104,13 +117,14 @@ export default function CalendarWidget({ assessments }) {
   });
 
   return (
-    <div style={{ background: '#fff', borderRadius: '8px', padding: '20px', border: '1px solid #eaeaea' }}>
+    /* Wraps the entire calendar in your existing profile-section styling */
+    <div className="profile-section">
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="section-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
         <button onClick={prevMonth} className="btn btn-outline btn-sm">
-          &larr; Previous
+          &larr; Prev
         </button>
-        <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--primary-blue)' }}>
           {monthNames[month]} {year}
         </h3>
         <button onClick={nextMonth} className="btn btn-outline btn-sm">
@@ -118,14 +132,15 @@ export default function CalendarWidget({ assessments }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', marginBottom: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', marginBottom: '10px', marginTop: '1rem' }}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} style={{ textAlign: 'center', fontWeight: 'bold', color: '#888', fontSize: '0.9rem', textTransform: 'uppercase' }}>
+          <div key={day} style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
             {day}
           </div>
         ))}
       </div>
 
+      {/* Grid layouts accept inline styling natively without breaking dark mode */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
         {blanks}
         {days}

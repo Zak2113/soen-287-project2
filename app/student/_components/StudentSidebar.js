@@ -23,7 +23,7 @@ export default function StudentSidebar() {
         <Link href="/" className="brand-logo">
           Noodle<span className="brand-accent">.</span>
         </Link>
-        <ThemeToggle />
+        
       </div>
 
       <nav className="sidebar-nav">

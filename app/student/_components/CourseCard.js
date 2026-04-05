@@ -4,23 +4,23 @@ import styles from './CourseCard.module.css'
 
 export default function CourseCard({ id, courseCode, term, title, instructor, progress }) {
     return (
-        <div className={styles["course-card"]}>
-            <div className={styles["course-card-header"]}>
-                <span className={styles["course-code"]}>{courseCode}</span>
-                <span className={styles["course-term"]}>{term}</span>
+        <div className="course-card">
+            <div className="course-card-header">
+                <span className="course-code">{courseCode}</span>
+                <span className="course-term">{term}</span>
             </div>
-            <h4 className={styles["course-title"]}>{title}</h4>
-            <p className={styles["course-instructor"]}>{instructor}</p>
+            <h4 className="course-title">{title}</h4>
+            <p className="course-instructor">{instructor}</p>
 
-            <div className={styles["course-progress"]}>
-                <div className={styles["progress-info"]}>
+            <div className="course-progress">
+                <div className="progress-info">
                     <span>Completion</span>
                     <strong>{progress}%</strong>
                 </div>
-                <div className={styles["progress-bar"]}>
+                <div className="progress-bar">
                     {/* React requires inline styles to be objects */}
                     <div
-                        className={styles['progress-fill']}
+                        className='progress-fill'
                         style={{ width: `${progress}%` }}
                     ></div>
                 </div>

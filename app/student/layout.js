@@ -3,6 +3,7 @@
 import { auth } from "@/auth"; // Import your NextAuth config
 import StudentSidebar from './_components/StudentSidebar';
 import Link from 'next/link';
+import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default async function StudentLayout({ children }) {
   // 1. Fetch the session on the server
@@ -35,6 +36,7 @@ export default async function StudentLayout({ children }) {
               {/* Inject the dynamic initials */}
               <Link href="/student/profile">{initials}</Link>
             </div>
+            <ThemeToggle />
           </div>
         </header>
         
