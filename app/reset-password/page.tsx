@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function ResetPasswordPage() {
+// 1. Extract the form and the useSearchParams hook into its own component
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const res = await fetch("/api/auth/reset-password", {
@@ -26,9 +27,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div style={{ maxWidth: "400px", margin: "auto" }}>
-      <h2>Reset Password</h2>
-
+    <>
       <form onSubmit={handleSubmit}>
         <input
           type="password"
@@ -42,6 +41,20 @@ export default function ResetPasswordPage() {
       </form>
 
       {message && <p>{message}</p>}
+    </>
+  );
+}
+
+// 2. The main default export now wraps that form in a Suspense boundary
+export default function ResetPasswordPage() {
+  return (
+    <div style={{ maxWidth: "400px", margin: "auto" }}>
+      <h2>Reset Password</h2>
+      
+      <Suspense fallback={<p>Loading form...</p>}>
+        <ResetPasswordForm />
+      </Suspense>
+      
     </div>
   );
 }
