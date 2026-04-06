@@ -47,5 +47,3 @@ next-env.d.ts
 *.db-shm
 *.db-wal
 
-# Drizzle migrations (Optional, but keep them if you want to track schema history)
-/db/migrations

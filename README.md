@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Noodle 🍜
+
+A full-stack Next.js application. Follow the instructions below to get the project up and running on your local machine.
 
 ## Getting Started
 
-First, run the development server:
+### 1. Download the Project
+First, download the project `.zip` file and extract it to your preferred location on your computer.
+
+### 2. Open the Terminal
+Open your terminal and navigate into the extracted project directory:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd path/to/noodle
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Install Dependencies
+Install all the required Node.js packages by running:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Set Up Environment Variables
+Create a new file named `.env` in the root directory of the project. You will need to add the following specific values to this file (replace the placeholder values with your actual credentials):
 
-## Learn More
+```env
+# Database Configuration
+DATABASE_URL="your_database_connection_string_here"
 
-To learn more about Next.js, take a look at the following resources:
+# Application Secrets
+NEXTAUTH_SECRET="your_nextauth_secret_here"
+NEXTAUTH_URL="http://localhost:3000"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Add any other required specific values below:
+# API_KEY="your_api_key_here"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Run Database Migrations
+Before starting the application, set up your database schema by running the migration command:
 
-## Deploy on Vercel
+```bash
+npm run db:migrate
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 6. Build the Application
+Create an optimized production build of the Next.js project:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+```
+
+### 7. Start the Server
+Finally, start the production server:
+
+```bash
+npm run start
+```
+
+The application should now be running. Check your terminal for the local host URL (usually `http://localhost:3000`).
