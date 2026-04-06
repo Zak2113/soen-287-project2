@@ -11,7 +11,7 @@ First, download the project `.zip` file and extract it to your preferred locatio
 Open your terminal and navigate into the extracted project directory:
 
 ```bash
-cd path/to/noodle
+cd soen-287-project2/
 ```
 
 ### 3. Install Dependencies
@@ -25,15 +25,11 @@ npm install
 Create a new file named `.env` in the root directory of the project. You will need to add the following specific values to this file (replace the placeholder values with your actual credentials):
 
 ```env
-# Database Configuration
-DATABASE_URL="your_database_connection_string_here"
 
-# Application Secrets
-NEXTAUTH_SECRET="your_nextauth_secret_here"
-NEXTAUTH_URL="http://localhost:3000"
-
-# Add any other required specific values below:
-# API_KEY="your_api_key_here"
+AUTH_SECRET="SECRET"
+SMTP_PASSWORD='"!19-8.RuCC^'
+AUTH_TRUST_HOST=true
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 ### 5. Run Database Migrations
