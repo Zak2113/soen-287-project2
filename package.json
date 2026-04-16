@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
-  },
+  "dev": "next dev",
+  "build": "next build",
+  "start": "npm run db:migrate && next start",
+  "lint": "eslint",
+  "db:push": "drizzle-kit push",
+  "db:generate": "drizzle-kit generate",
+  "db:migrate": "drizzle-kit migrate"
+},
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.8.0",
